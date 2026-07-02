@@ -136,4 +136,6 @@
 - [x] Introduce `ownerRole` tracking to restrict the Reset Devotional button to the creator user
 - [x] Create a custom Reset Confirmation security modal prompting Yes/No choices before wiping data
 - [x] Verify local unit + E2E test runs, ensure production Vercel build connects correctly, and update logs
+- [x] Modify resetAll to keep names, activeUser, and ownerRole active so both users stay logged in
+- [x] Update fetchServerState to overwrite progress metrics when partners reset
 

@@ -63,7 +63,7 @@ A highly polished, single-page, responsive Next.js application for a couple ("Hi
   - Hidden "switch to" partner profile toggle in user menu (users only see their active view).
   - Click-outside detection: Clicking anywhere outside the user dropdown menu automatically closes it.
   - Reset Authorization: Only the user who onboarded first and created the session (`ownerRole`) is permitted to trigger the "Reset Devotional" action.
-  - Reset Confirmation: When resetting, a custom modal confirmation popup prompts the user with "Yes" or "No" to prevent accidental data deletion.
+  - Reset Confirmation: When resetting, a custom modal confirmation popup prompts the user with "Yes" or "No" to prevent accidental data deletion. Wiping progress clears all devotional read and reflection states, resetting all counters to 0, but preserves active user profile configurations (names, emails, active role, and session ID) so both users stay logged in.
 
 ## 2. Technical Architecture & File Layout
 

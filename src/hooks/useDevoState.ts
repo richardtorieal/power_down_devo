@@ -117,14 +117,14 @@ export function useDevoState() {
           if (s.ownerRole) setOwnerRole(s.ownerRole);
 
           if (isInitial || !currentActiveUser) {
-            if (s.hisProgress) setHisProgress(s.hisProgress);
-            if (s.herProgress) setHerProgress(s.herProgress);
-            if (s.hisRead) setHisRead(s.hisRead);
-            if (s.herRead) setHerRead(s.herRead);
-            if (s.hisJournal) setHisJournal(s.hisJournal);
-            if (s.herJournal) setHerJournal(s.herJournal);
-            if (s.hisReflections) setHisReflections(s.hisReflections);
-            if (s.herReflections) setHerReflections(s.herReflections);
+            setHisProgress(s.hisProgress || {});
+            setHerProgress(s.herProgress || {});
+            setHisRead(s.hisRead || {});
+            setHerRead(s.herRead || {});
+            setHisJournal(s.hisJournal || {});
+            setHerJournal(s.herJournal || {});
+            setHisReflections(s.hisReflections || {});
+            setHerReflections(s.herReflections || {});
             if (s.hisName) setHisName(s.hisName);
             if (s.herName) setHerName(s.herName);
             if (s.hisEmail) setHisEmail(s.hisEmail);
@@ -132,17 +132,17 @@ export function useDevoState() {
           } else {
             // Role Partitioning: Only sync partner's data
             if (currentActiveUser === 'his') {
-              if (s.herProgress) setHerProgress(s.herProgress);
-              if (s.herRead) setHerRead(s.herRead);
-              if (s.herJournal) setHerJournal(s.herJournal);
-              if (s.herReflections) setHerReflections(s.herReflections);
+              setHerProgress(s.herProgress || {});
+              setHerRead(s.herRead || {});
+              setHerJournal(s.herJournal || {});
+              setHerReflections(s.herReflections || {});
               if (s.herName) setHerName(s.herName);
               if (s.herEmail) setHerEmail(s.herEmail);
             } else if (currentActiveUser === 'her') {
-              if (s.hisProgress) setHisProgress(s.hisProgress);
-              if (s.hisRead) setHisRead(s.hisRead);
-              if (s.hisJournal) setHisJournal(s.hisJournal);
-              if (s.hisReflections) setHisReflections(s.hisReflections);
+              setHisProgress(s.hisProgress || {});
+              setHisRead(s.hisRead || {});
+              setHisJournal(s.hisJournal || {});
+              setHisReflections(s.hisReflections || {});
               if (s.hisName) setHisName(s.hisName);
               if (s.hisEmail) setHisEmail(s.hisEmail);
             }
@@ -250,17 +250,13 @@ export function useDevoState() {
     const empty = {
       hisProgress: {}, herProgress: {}, hisRead: {}, herRead: {},
       hisJournal: {}, herJournal: {}, hisReflections: {}, herReflections: {},
-      hisName: '', herName: '', hisEmail: '', herEmail: '',
-      ownerRole: ''
+      hisName, herName, hisEmail, herEmail,
+      ownerRole
     };
     setHisProgress({}); setHerProgress({});
     setHisRead({}); setHerRead({});
     setHisJournal({}); setHerJournal({});
     setHisReflections({}); setHerReflections({});
-    setHisName(''); setHerName('');
-    setHisEmail(''); setHerEmail('');
-    setActiveUser(null);
-    setOwnerRole('');
 
     try {
       await fetch('/api/devo/state', {
