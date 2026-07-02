@@ -110,3 +110,30 @@
 - [x] Verify build and live sync correctness
 - [x] Grade rubric to 100% completion
 - [x] Update tasks.md
+
+## Part 15: Session-Based Onboarding & Invite Magic Link
+- [x] Remove "Today's Reading" callout banner from top of page
+- [x] Create single-user onboarding form (name, email, role)
+- [x] Generate session UUID on first onboarding
+- [x] Scoping `/api/devo/state` under `?session=UUID` query parameters
+- [x] Build `InviteModal` to share unique `/?join=UUID` magic links
+- [x] Show "Invite Partner" banner on dashboard and dropdown option
+- [x] Implement magic link landing page join flow auto-assigning remaining partner role
+- [x] Set up E2E test coverage for onboarding, invite links, and joint walks
+
+## Part 16: Mr./Ms. Vocabulary, Vercel KV Setup & State Isolation
+- [x] Replace Husband/Wife labels with Mr./Ms. throughout the app
+- [x] Style active roles, progress meters, and cards with subtle Navy Blue and Blush Pink accents
+- [x] Provision and connect Vercel Upstash Redis KV Database to the project
+- [x] Delete all hardcoded fallback json files containing name fields
+- [x] Disable and label the "Invite Partner" dropdown option when partner has joined
+- [x] Run compilation checks, local unit/E2E test runs, and promote build to production on Vercel
+
+## Part 17: User Menu Click-Outside, Hidden Switcher & Owner Reset Security Modal
+- [x] Initialize Git repository, push to GitHub user `richartorieal/power_down_devo`, and connect Vercel to auto deploy on push
+- [x] Hide the "switch to partner" dropdown action to enforce single-user viewpoints
+- [x] Implement Ref click-outside listener to dismiss the user settings menu cleanly
+- [x] Introduce `ownerRole` tracking to restrict the Reset Devotional button to the creator user
+- [x] Create a custom Reset Confirmation security modal prompting Yes/No choices before wiping data
+- [x] Verify local unit + E2E test runs, ensure production Vercel build connects correctly, and update logs
+

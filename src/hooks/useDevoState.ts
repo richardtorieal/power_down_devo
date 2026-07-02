@@ -28,6 +28,7 @@ export function useDevoState() {
   const [herEmail, setHerEmail] = useState<string>('');
   const [activeUser, setActiveUser] = useState<'his' | 'her' | null>(null);
   const [sessionId, setSessionId] = useState<string>('');
+  const [ownerRole, setOwnerRole] = useState<'his' | 'her' | ''>('');
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Use refs to track values for polling function to avoid stale closures
@@ -79,6 +80,7 @@ export function useDevoState() {
       const storedHisEmail = localStorage.getItem(`${LS_PREFIX}his_email`);
       const storedHerEmail = localStorage.getItem(`${LS_PREFIX}her_email`);
       const storedActiveUser = localStorage.getItem(`${LS_PREFIX}active_user`);
+      const storedOwnerRole = localStorage.getItem(`${LS_PREFIX}owner_role`);
 
       if (storedHisProgress) setHisProgress(JSON.parse(storedHisProgress));
       if (storedHerProgress) setHerProgress(JSON.parse(storedHerProgress));
@@ -93,6 +95,7 @@ export function useDevoState() {
       if (storedHisEmail) setHisEmail(storedHisEmail);
       if (storedHerEmail) setHerEmail(storedHerEmail);
       if (storedActiveUser) setActiveUser(storedActiveUser as 'his' | 'her');
+      if (storedOwnerRole) setOwnerRole(storedOwnerRole as 'his' | 'her');
     } catch (e) {
       console.error('Error loading local devotions state', e);
     }
@@ -110,6 +113,8 @@ export function useDevoState() {
         if (data.state) {
           const s = data.state;
           const currentActiveUser = activeUserRef.current;
+
+          if (s.ownerRole) setOwnerRole(s.ownerRole);
 
           if (isInitial || !currentActiveUser) {
             if (s.hisProgress) setHisProgress(s.hisProgress);
@@ -145,18 +150,32 @@ export function useDevoState() {
         }
       }
     } catch (err) {
-      console.error('Failed to sync state from server:', err);
+      console.error('Failed to sync server state:', err);
     }
   };
 
-  // Poll every 2 minutes when tab is visible
+  // Initial load sync
+  useEffect(() => {
+    if (isLoaded && sessionId) {
+      fetchServerState(true);
+    }
+  }, [isLoaded, sessionId]);
+
+  // Set owner role on first onboarding
+  useEffect(() => {
+    if (isLoaded && activeUser && !ownerRole) {
+      const partnerExists = activeUser === 'his' ? !!herName : !!hisName;
+      if (!partnerExists) {
+        setOwnerRole(activeUser);
+      }
+    }
+  }, [activeUser, ownerRole, hisName, herName, isLoaded]);
+
+  // Polling for updates every 2 minutes
   useEffect(() => {
     if (!isLoaded || !sessionId) return;
-    fetchServerState(true);
     const interval = setInterval(() => {
-      if (typeof document !== 'undefined' && !document.hidden) {
-        fetchServerState(false);
-      }
+      fetchServerState(false);
     }, 120000);
     return () => clearInterval(interval);
   }, [isLoaded, sessionId]);
@@ -177,7 +196,8 @@ export function useDevoState() {
               hisJournal, herJournal,
               hisReflections, herReflections,
               hisName, herName,
-              hisEmail, herEmail
+              hisEmail, herEmail,
+              ownerRole
             }
           })
         });
@@ -189,7 +209,7 @@ export function useDevoState() {
   }, [
     hisProgress, herProgress, hisRead, herRead,
     hisJournal, herJournal, hisReflections, herReflections,
-    hisName, herName, hisEmail, herEmail,
+    hisName, herName, hisEmail, herEmail, ownerRole,
     isLoaded, sessionId
   ]);
 
@@ -207,6 +227,7 @@ export function useDevoState() {
   useEffect(() => { if (isLoaded) { if (hisEmail) localStorage.setItem(`${LS_PREFIX}his_email`, hisEmail); else localStorage.removeItem(`${LS_PREFIX}his_email`); } }, [hisEmail, isLoaded]);
   useEffect(() => { if (isLoaded) { if (herEmail) localStorage.setItem(`${LS_PREFIX}her_email`, herEmail); else localStorage.removeItem(`${LS_PREFIX}her_email`); } }, [herEmail, isLoaded]);
   useEffect(() => { if (isLoaded) { if (activeUser) localStorage.setItem(`${LS_PREFIX}active_user`, activeUser); else localStorage.removeItem(`${LS_PREFIX}active_user`); } }, [activeUser, isLoaded]);
+  useEffect(() => { if (isLoaded) { if (ownerRole) localStorage.setItem(`${LS_PREFIX}owner_role`, ownerRole); else localStorage.removeItem(`${LS_PREFIX}owner_role`); } }, [ownerRole, isLoaded]);
 
   const toggleHisProgress = (day: number) => setHisProgress(prev => ({ ...prev, [day]: !prev[day] }));
   const toggleHerProgress = (day: number) => setHerProgress(prev => ({ ...prev, [day]: !prev[day] }));
@@ -226,29 +247,29 @@ export function useDevoState() {
   };
 
   const resetAll = async () => {
-    if (window.confirm('Are you sure you want to reset all progress, journal entries, and profile settings?')) {
-      const empty = {
-        hisProgress: {}, herProgress: {}, hisRead: {}, herRead: {},
-        hisJournal: {}, herJournal: {}, hisReflections: {}, herReflections: {},
-        hisName: '', herName: '', hisEmail: '', herEmail: ''
-      };
-      setHisProgress({}); setHerProgress({});
-      setHisRead({}); setHerRead({});
-      setHisJournal({}); setHerJournal({});
-      setHisReflections({}); setHerReflections({});
-      setHisName(''); setHerName('');
-      setHisEmail(''); setHerEmail('');
-      setActiveUser(null);
+    const empty = {
+      hisProgress: {}, herProgress: {}, hisRead: {}, herRead: {},
+      hisJournal: {}, herJournal: {}, hisReflections: {}, herReflections: {},
+      hisName: '', herName: '', hisEmail: '', herEmail: '',
+      ownerRole: ''
+    };
+    setHisProgress({}); setHerProgress({});
+    setHisRead({}); setHerRead({});
+    setHisJournal({}); setHerJournal({});
+    setHisReflections({}); setHerReflections({});
+    setHisName(''); setHerName('');
+    setHisEmail(''); setHerEmail('');
+    setActiveUser(null);
+    setOwnerRole('');
 
-      try {
-        await fetch('/api/devo/state', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, state: empty })
-        });
-      } catch (err) {
-        console.error('Failed to reset server state:', err);
-      }
+    try {
+      await fetch('/api/devo/state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, state: empty })
+      });
+    } catch (err) {
+      console.error('Failed to reset server state:', err);
     }
   };
 
@@ -259,7 +280,7 @@ export function useDevoState() {
     hisReflections, herReflections,
     hisName, herName,
     hisEmail, herEmail,
-    activeUser, sessionId, isLoaded,
+    activeUser, sessionId, ownerRole, isLoaded,
     setHisName, setHerName,
     setHisEmail, setHerEmail,
     setActiveUser,

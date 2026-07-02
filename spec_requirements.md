@@ -56,6 +56,14 @@ A highly polished, single-page, responsive Next.js application for a couple ("Hi
 - **Verbatim Content Integration**:
   - All 31 days mapped out fully with correct scripture references and reflection questions (no placeholders, no cutoffs).
   - All weekly journal prompts mapped out.
+- **Git & Vercel Connection**:
+  - Initialized git repository connected to GitHub user `richartorieal/power_down_devo`.
+  - Linked to Vercel for continuous integration and auto deployment on updates and PRs.
+- **Access Control & Security Rules**:
+  - Hidden "switch to" partner profile toggle in user menu (users only see their active view).
+  - Click-outside detection: Clicking anywhere outside the user dropdown menu automatically closes it.
+  - Reset Authorization: Only the user who onboarded first and created the session (`ownerRole`) is permitted to trigger the "Reset Devotional" action.
+  - Reset Confirmation: When resetting, a custom modal confirmation popup prompts the user with "Yes" or "No" to prevent accidental data deletion.
 
 ## 2. Technical Architecture & File Layout
 
@@ -64,5 +72,5 @@ A highly polished, single-page, responsive Next.js application for a couple ("Hi
 - `/src/components/OverviewTab.tsx`: Overview content, F-A-I-T-H strategy, and global stats.
 - `/src/components/DevotionalTab.tsx`: Weeks navigation and Day devotionals.
 - `/src/components/JournalTab.tsx`: Weekly journal inputs.
-- `/src/hooks/useDevoState.ts`: Custom React hook encapsulating state loading and saving.
+- `/src/hooks/useDevoState.ts`: Custom React hook encapsulating state loading, saving, and ownerRole validation.
 - `/src/data/devotionals.ts`: Static dataset containing the 31 days data and journal prompts.

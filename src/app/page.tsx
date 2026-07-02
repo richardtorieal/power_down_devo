@@ -36,7 +36,7 @@ export default function FaithApp() {
     hisReflections, herReflections,
     hisName, herName,
     hisEmail, herEmail,
-    activeUser, sessionId, isLoaded,
+    activeUser, sessionId, ownerRole, isLoaded,
     setHisName, setHerName,
     setHisEmail, setHerEmail,
     setActiveUser,
@@ -50,6 +50,23 @@ export default function FaithApp() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const profileMenuRef = React.useRef<HTMLDivElement>(null);
+
+  // Click outside to close user menu
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    }
+    if (showProfileMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showProfileMenu]);
 
   // Detect if arriving via magic link ?join=UUID
   const [isJoinFlow, setIsJoinFlow] = useState(false);
@@ -382,19 +399,7 @@ export default function FaithApp() {
                     <span className="text-[10px] text-slate-400 truncate block">{activeUser === "his" ? hisEmail : herEmail}</span>
                   </div>
 
-                  {/* Switch partner if they've joined */}
-                  {partnerHasJoined && (
-                    <button
-                      onClick={() => {
-                        setActiveUser(partnerRole);
-                        setShowProfileMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2.5 text-xs font-medium text-slate-700 cursor-pointer"
-                    >
-                      <div className={`w-2 h-2 rounded-full ${partnerRole === "his" ? "bg-blue-900" : "bg-rose-400"}`} />
-                      <span>Switch to {partnerRole === "his" ? (hisName || "Mr.") : (herName || "Ms.")}</span>
-                    </button>
-                  )}
+
 
                   {/* Invite Partner */}
                   <button
@@ -425,16 +430,18 @@ export default function FaithApp() {
                     <span>Edit My Profile</span>
                   </button>
 
-                  <button
-                    onClick={() => {
-                      resetAll();
-                      setShowProfileMenu(false);
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-rose-50 text-rose-600 flex items-center gap-2 text-xs font-medium cursor-pointer"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5 text-rose-400" />
-                    <span>Reset Devotional</span>
-                  </button>
+                  {(!ownerRole || activeUser === ownerRole) && (
+                    <button
+                      onClick={() => {
+                        setShowResetConfirm(true);
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-rose-50 text-rose-600 flex items-center gap-2 text-xs font-medium cursor-pointer"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 text-rose-400" />
+                      <span>Reset Devotional</span>
+                    </button>
+                  )}
                 </div>
               </>
             )}
@@ -624,6 +631,41 @@ export default function FaithApp() {
           activeUser={activeUser}
           onClose={() => setShowInviteModal(false)}
         />
+      )}
+
+      {/* ── Reset Devotional Confirmation Modal ───────────────────────────── */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn" onClick={(e) => { if (e.target === e.currentTarget) setShowResetConfirm(false); }}>
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 w-full max-w-sm shadow-2xl space-y-5 text-center relative overflow-hidden animate-fadeIn">
+            <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center mx-auto text-rose-600">
+              <RefreshCw className="w-6 h-6 animate-spin-once" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-serif font-bold text-slate-900 text-lg">Reset Devotional?</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you absolutely sure you want to reset all progress, journal entries, and profile settings? This action is permanent and cannot be undone.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-all cursor-pointer active:scale-95"
+              >
+                No, Keep Data
+              </button>
+              <button
+                onClick={async () => {
+                  await resetAll();
+                  setShowResetConfirm(false);
+                  showToast("Devotional reset successfully.");
+                }}
+                className="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition-all cursor-pointer active:scale-95 shadow-md shadow-rose-200"
+              >
+                Yes, Reset Everything
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ── Footer ────────────────────────────────────────────────────────── */}
